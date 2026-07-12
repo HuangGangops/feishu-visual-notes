@@ -6,6 +6,10 @@
 
 - Added macOS Intel and Apple Silicon integration smoke tests with pinned Feishu CLI installation, UTF-8 paths, archive permissions, and installed-Skill checks.
 - Whiteboard CLI discovery now requires both version and help commands to succeed.
+- Added a cross-platform correction loop that preserves failure evidence, fixes only Skill-owned behavior, and reruns focused and full-matrix checks without silent format or identity fallback.
+- Feishu wrapper JSON output now forces UTF-8 so Windows GBK consoles can return emoji and CJK dry-run content without encoding failures.
+- Added a three-platform published-release smoke test that downloads GitHub assets, verifies SHA-256, checks archive safety and script entry points, and installs into a Unicode path.
+- Sensitive-material tests now scan publishable Git files while excluding ignored local test documents and generated validation output.
 
 ## [1.0.0] - 2026-07-11
 

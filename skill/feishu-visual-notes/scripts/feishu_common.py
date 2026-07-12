@@ -104,4 +104,6 @@ def raw_cli(cli: Path, arguments: list[str]) -> str:
 
 
 def print_json(data: dict[str, Any]) -> None:
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8", errors="strict")
     print(json.dumps(data, ensure_ascii=False, indent=2))

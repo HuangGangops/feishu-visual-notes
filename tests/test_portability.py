@@ -28,6 +28,22 @@ def run(*arguments: object, cwd: Path = REPO, extra_env: dict[str, str] | None =
     )
 
 
+def publishable_files() -> list[Path]:
+    result = subprocess.run(
+        ["git", "ls-files", "--cached", "--others", "--exclude-standard", "-z"],
+        cwd=REPO,
+        capture_output=True,
+        check=False,
+    )
+    if result.returncode == 0:
+        return [REPO / os.fsdecode(item) for item in result.stdout.split(b"\0") if item]
+    ignored_roots = {".git", "dist", "test-results", "whiteboard-previews", "ocr-output", "course-images"}
+    return [
+        path for path in REPO.rglob("*")
+        if path.is_file() and not ignored_roots.intersection(path.relative_to(REPO).parts)
+    ]
+
+
 class PortabilityTests(unittest.TestCase):
     def test_frontmatter_and_name(self) -> None:
         text = (SKILL / "SKILL.md").read_text(encoding="utf-8")
@@ -45,8 +61,8 @@ class PortabilityTests(unittest.TestCase):
             re.compile(r"sk-[A-Za-z0-9_-]{12,}"),
         ]
         findings = []
-        for path in REPO.rglob("*"):
-            if not path.is_file() or ".git" in path.parts or path.suffix in {".pyc", ".pyo"}:
+        for path in publishable_files():
+            if not path.is_file() or path.suffix in {".pyc", ".pyo"}:
                 continue
             try:
                 text = path.read_text(encoding="utf-8")
@@ -64,6 +80,26 @@ class PortabilityTests(unittest.TestCase):
         result = run(sys.executable, SCRIPTS / "preflight.py", "--offline", "--json")
         self.assertEqual(0, result.returncode, result.stdout + result.stderr)
         self.assertTrue(json.loads(result.stdout)["ok"])
+
+    def test_feishu_json_output_forces_utf8(self) -> None:
+        script = (
+            "import sys; "
+            f"sys.path.insert(0, {str(SCRIPTS)!r}); "
+            "from feishu_common import print_json; "
+            "print_json({'message': '\\U0001f4cc'})"
+        )
+        result = subprocess.run(
+            [sys.executable, "-c", script],
+            cwd=REPO,
+            text=True,
+            encoding="utf-8",
+            errors="strict",
+            capture_output=True,
+            check=False,
+            env={**os.environ, "PYTHONIOENCODING": "gbk"},
+        )
+        self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+        self.assertEqual({"message": "\U0001f4cc"}, json.loads(result.stdout))
 
     def test_first_run_state_and_mcp_capabilities(self) -> None:
         with tempfile.TemporaryDirectory(prefix="feishu-state-") as temp:

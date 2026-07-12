@@ -337,6 +337,10 @@ If editable SVG whiteboards, user-identity access, or the requested in-place upd
 - Require Python 3.10+, Node.js 18+, Lark/Feishu CLI 1.0.67+, and Whiteboard CLI 0.2.12 for the tested CLI backend.
 - Support Windows 10/11 through Python and PowerShell entry points.
 - Support macOS Intel and Apple Silicon through Python and Bash entry points. Public CI covers both architectures, pinned CLI smoke tests, Unicode-path installation, and archive permissions; keep real-machine Feishu authentication and document writes marked as unverified until tested on physical Macs.
+- When platform behavior fails, classify the failure before changing anything. On Windows check PowerShell parsing, `.cmd` wrappers, `LOCALAPPDATA`, path quoting, execution policy, UTF-8, CLI compatibility, authentication, and document permission. On macOS check CPU architecture, PATH or Homebrew location, executable mode, UTF-8, CLI compatibility, authentication, and document permission.
+- Correct Skill-owned code and temporary outputs iteratively, then rerun the failing command, preflight, installed-Skill self-test, the relevant platform smoke test, and the full public CI matrix. Preserve the failure evidence and the result of each retry.
+- Do not hide a platform failure by switching identity, replacing editable whiteboards with images, using an operating-system-specific workaround on another platform, relaxing a required validation, or silently editing the user's shell profile, PowerShell policy, Homebrew setup, credentials, or authorization.
+- If the cause is an external dependency or user permission, stop at the capability boundary, provide the exact detected state and repair command, and continue only after the dependency or permission is available.
 - Install with `python scripts/install.py`; Windows may use `scripts/install.ps1`, and macOS may use `scripts/install.sh`.
 - Keep credentials, authentication state, document snapshots, temporary OCR batches, generated previews, and `.feishu-backups` outside the installed Skill.
 
