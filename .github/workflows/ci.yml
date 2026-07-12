@@ -46,3 +46,26 @@ jobs:
         with:
           name: feishu-visual-notes-${{ matrix.os }}-py${{ matrix.python }}
           path: dist/*
+
+  macos-cli-smoke:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-latest
+            arch: arm64
+          - os: macos-15-intel
+            arch: x86_64
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "20"
+      - name: Install tested Feishu CLIs
+        run: npm install --global @larksuite/cli@1.0.67 @larksuite/whiteboard-cli@0.2.12
+      - name: Run macOS integration smoke test
+        run: python3 tests/macos_smoke.py --expected-arch ${{ matrix.arch }}

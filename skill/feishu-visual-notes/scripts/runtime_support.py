@@ -179,7 +179,13 @@ def find_whiteboard_cli() -> tuple[Path | None, str]:
         except (OSError, subprocess.TimeoutExpired):
             continue
         parsed = version_tuple(combined_output(result))
-        if result.returncode == 0 and parsed and parsed >= MIN_WHITEBOARD_CLI:
+        if result.returncode != 0 or not parsed or parsed < MIN_WHITEBOARD_CLI:
+            continue
+        try:
+            help_result = run([candidate, "--help"])
+        except (OSError, subprocess.TimeoutExpired):
+            continue
+        if help_result.returncode == 0 and combined_output(help_result):
             return candidate, ".".join(map(str, parsed))
     root = npm_global_root()
     if root:
@@ -190,7 +196,15 @@ def find_whiteboard_cli() -> tuple[Path | None, str]:
                 parsed = version_tuple(version)
                 if parsed and parsed >= MIN_WHITEBOARD_CLI:
                     paths = package_bin_from_root(root, "@larksuite/whiteboard-cli", "whiteboard-cli")
-                    return next((path for path in paths if path.is_file()), package_json), version
+                    for path in paths:
+                        if not path.is_file():
+                            continue
+                        try:
+                            help_result = run([path, "--help"])
+                        except (OSError, subprocess.TimeoutExpired):
+                            continue
+                        if help_result.returncode == 0 and combined_output(help_result):
+                            return path, version
             except (OSError, UnicodeError, json.JSONDecodeError):
                 pass
     return None, ""
