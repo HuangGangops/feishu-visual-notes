@@ -336,7 +336,7 @@ If editable SVG whiteboards, user-identity access, or the requested in-place upd
 
 - Require Python 3.10+, Node.js 18+, Lark/Feishu CLI 1.0.67+, and Whiteboard CLI 0.2.12 for the tested CLI backend.
 - Support Windows 10/11 through Python and PowerShell entry points.
-- Support macOS Intel and Apple Silicon through Python and Bash entry points; treat macOS as experimental until its public CI and real-machine checks pass.
+- Support macOS Intel and Apple Silicon through Python and Bash entry points. Public CI covers both architectures, pinned CLI smoke tests, Unicode-path installation, and archive permissions; keep real-machine Feishu authentication and document writes marked as unverified until tested on physical Macs.
 - Install with `python scripts/install.py`; Windows may use `scripts/install.ps1`, and macOS may use `scripts/install.sh`.
 - Keep credentials, authentication state, document snapshots, temporary OCR batches, generated previews, and `.feishu-backups` outside the installed Skill.
 

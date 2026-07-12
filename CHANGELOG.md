@@ -1,5 +1,12 @@
 # Changelog
 
+## [Unreleased]
+
+### Changed
+
+- Added macOS Intel and Apple Silicon integration smoke tests with pinned Feishu CLI installation, UTF-8 paths, archive permissions, and installed-Skill checks.
+- Whiteboard CLI discovery now requires both version and help commands to succeed.
+
 ## [1.0.0] - 2026-07-11
 
 ### Added
