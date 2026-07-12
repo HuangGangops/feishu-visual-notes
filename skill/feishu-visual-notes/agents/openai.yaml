@@ -1,0 +1,4 @@
+interface:
+  display_name: "Feishu Visual Notes"
+  short_description: "Build structured Feishu notes with editable diagrams"
+  default_prompt: "Use $feishu-visual-notes to check this computer's Feishu tooling, scan the complete PPT, transcript, or document, and produce structured notes with precise highlights and relationship-appropriate editable whiteboards."

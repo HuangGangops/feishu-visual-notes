@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  portability:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, macos-latest, macos-15-intel]
+        python: ["3.10", "3.11", "3.12"]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python }}
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "20"
+      - name: Validate Skill
+        run: python skill/feishu-visual-notes/scripts/self_test.py
+      - name: Test portability
+        run: python tests/test_portability.py
+      - name: Check offline setup
+        run: python skill/feishu-visual-notes/scripts/preflight.py --offline --json
+      - name: Check Bash entry points
+        if: runner.os == 'macOS'
+        run: bash -n install.sh preflight.sh tools/package_release.sh skill/feishu-visual-notes/scripts/install.sh skill/feishu-visual-notes/scripts/preflight.sh
+      - name: Check PowerShell entry points
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          Get-ChildItem -Recurse -Filter *.ps1 | ForEach-Object {
+            [void][scriptblock]::Create((Get-Content $_.FullName -Raw))
+          }
+      - name: Build release archives
+        run: python tools/package_release.py --output-directory dist
+      - uses: actions/upload-artifact@v6
+        with:
+          name: feishu-visual-notes-${{ matrix.os }}-py${{ matrix.python }}
+          path: dist/*

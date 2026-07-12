@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
+if command -v python3 >/dev/null 2>&1; then PYTHON=python3; else PYTHON=python; fi
+exec "$PYTHON" "$ROOT/package_release.py" "$@"
